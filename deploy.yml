@@ -1,16 +1,24 @@
+ HEAD
 HEAD
 name: Deploy to EC2
 name: Deploy static site to EC2
  5dc2131 (Add static site files)
 
+name: Deploy to EC2
+e02279c (feat: initial static site)
+
 on:
   push:
     branches:
+ HEAD
       HEAD
+
+ e02279c (feat: initial static site)
       - main
 
 jobs:
   deploy:
+ HEAD
     name: Sync files to EC2
     runs-on: ubuntu-latest
 
@@ -41,10 +49,24 @@ jobs:
       - name: Copy files via SSH
         uses: appleboy/scp-action@v1
          5dc2131 (Add static site files)
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Show current files
+        run: ls
+
+      - name: Sync files to EC2
+        uses: appleboy/scp-action@v1
+ e02279c (feat: initial static site)
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+ HEAD
           HEAD
           port: 22
           source: "./"
@@ -78,3 +100,7 @@ jobs:
             sudo rm -rf /home/${{ secrets.EC2_USER }}/temp
             sudo nginx -t && sudo systemctl reload nginx
 >>>>>>> 5dc2131 (Add static site files)
+=======
+          source: "."
+          target: "/home/${{ secrets.EC2_USER }}"
+>>>>>>> e02279c (feat: initial static site)
