@@ -1,8 +1,12 @@
+HEAD
 name: Deploy to EC2
+name: Deploy static site to EC2
+ 5dc2131 (Add static site files)
 
 on:
   push:
     branches:
+      HEAD
       - main
 
 jobs:
@@ -16,10 +20,32 @@ jobs:
 
       - name: Deploy via SCP
         uses: appleboy/scp-action@v0.1.4
+
+          -main
+       workflow_dispatch"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r'> ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+         5dc2131 (Add static site files)
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          HEAD
           port: 22
           source: "./"
           target: "/home/ec2-user/app"
@@ -30,11 +56,25 @@ jobs:
 
       - name: Restart Nginx
         uses: appleboy/ssh-action@v0.1.10
+
+          source: ./
+          target: /home/${{ secrets.EC2_USER }}/temp
+
+      - name: Execute remote SSH commands to copy from temp to real folder
+        uses: appleboy/ssh-action@v1
+>>>>>>> 5dc2131 (Add static site files)
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+<<<<<<< HEAD
           port: 22
           script: |
           sudo systemctl restart nginx
 
+=======
+          script: |
+            sudo cp -r /home/${{ secrets.EC2_USER }}/temp/* /usr/site/
+            sudo rm -rf /home/${{ secrets.EC2_USER }}/temp
+            sudo nginx -t && sudo systemctl reload nginx
+>>>>>>> 5dc2131 (Add static site files)
